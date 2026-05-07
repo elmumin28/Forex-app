@@ -7,100 +7,71 @@
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
   <style>
-    :root {
-      --bg:#050a0e;--surface:#0b1318;--card:#0f1c24;--border:#1a3040;
-      --green:#00ffaa;--red:#ff4466;--yellow:#ffd700;--blue:#00aaff;--orange:#ff8c00;
-      --text:#cce8f0;--muted:#4a7a90;
-      --font-mono:'Share Tech Mono',monospace;--font-ui:'Rajdhani',sans-serif;
-    }
+    :root{--bg:#050a0e;--surface:#0b1318;--card:#0f1c24;--border:#1a3040;--green:#00ffaa;--red:#ff4466;--yellow:#ffd700;--blue:#00aaff;--orange:#ff8c00;--text:#cce8f0;--muted:#4a7a90;--font-mono:'Share Tech Mono',monospace;--font-ui:'Rajdhani',sans-serif;}
     *{margin:0;padding:0;box-sizing:border-box;}
     body{background:var(--bg);color:var(--text);font-family:var(--font-ui);min-height:100vh;overflow-x:hidden;}
     body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,170,0.015) 2px,rgba(0,255,170,0.015) 4px);pointer-events:none;z-index:999;}
 
-    /* ===================== LOGIN SCREEN ===================== */
+    /* LOGIN */
     #loginScreen{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;}
     #loginScreen.hidden{display:none;}
-
     .login-logo{font-family:var(--font-mono);font-size:28px;color:var(--green);letter-spacing:4px;text-shadow:0 0 30px rgba(0,255,170,0.6);margin-bottom:6px;}
     .login-logo span{color:var(--muted);}
-    .login-subtitle{font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:3px;margin-bottom:50px;}
-
-    .pin-dots{display:flex;gap:16px;margin-bottom:40px;}
-    .pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--muted);background:transparent;transition:all 0.2s;}
+    .login-subtitle{font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:3px;margin-bottom:40px;}
+    .lock-icon{font-size:48px;margin-bottom:20px;}
+    .pin-label{font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:3px;margin-bottom:16px;}
+    .pin-dots{display:flex;gap:16px;margin-bottom:32px;}
+    .pin-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);background:transparent;transition:all 0.2s;}
     .pin-dot.filled{background:var(--green);border-color:var(--green);box-shadow:0 0 10px var(--green);}
-    .pin-dot.error{background:var(--red);border-color:var(--red);box-shadow:0 0 10px var(--red);}
+    .pin-dot.error{background:var(--red);border-color:var(--red);}
+    .pin-dot.shake{animation:shake 0.4s ease;}
+    @keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
+    .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:300px;}
+    .key{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;font-family:var(--font-mono);font-size:20px;color:white;cursor:pointer;text-align:center;transition:all 0.15s;user-select:none;}
+    .key:active{background:rgba(0,255,170,0.15);border-color:var(--green);transform:scale(0.95);}
+    .key.del{color:var(--red);font-size:16px;}.key.bio{color:var(--blue);font-size:22px;}
+    .login-error{font-family:var(--font-mono);font-size:11px;color:var(--red);letter-spacing:2px;margin-top:16px;min-height:16px;}
+    .change-pin-hint{font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-top:20px;}
 
-    .pin-label{font-family:var(--font-mono);font-size:12px;color:var(--muted);letter-spacing:2px;margin-bottom:30px;text-align:center;min-height:20px;}
-
-    .pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:280px;margin-bottom:20px;}
-    .pin-btn{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 10px;font-family:var(--font-mono);font-size:22px;color:white;cursor:pointer;transition:all 0.15s;text-align:center;user-select:none;}
-    .pin-btn:active{background:rgba(0,255,170,0.15);border-color:var(--green);transform:scale(0.95);}
-    .pin-btn.zero{grid-column:2;}
-    .pin-btn.del{background:transparent;border-color:transparent;color:var(--muted);font-size:18px;}
-    .pin-btn.del:active{color:var(--red);}
-
-    .fingerprint-btn{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:10px;cursor:pointer;padding:16px;}
-    .fp-icon{font-size:42px;animation:fpPulse 2s infinite;}
-    @keyframes fpPulse{0%,100%{opacity:0.6;transform:scale(1);}50%{opacity:1;transform:scale(1.1);}}
-    .fp-label{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:2px;}
-
-    .login-footer{position:absolute;bottom:30px;font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:1px;text-align:center;}
-
-    /* SETUP PIN SCREEN */
-    #setupScreen{position:fixed;inset:0;background:var(--bg);z-index:1001;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;}
-    #setupScreen.hidden{display:none;}
-    .setup-step{font-family:var(--font-mono);font-size:11px;color:var(--yellow);letter-spacing:2px;margin-bottom:8px;}
-
-    /* ===================== MAIN APP ===================== */
-    #mainApp{display:none;}
-    #mainApp.visible{display:block;}
+    /* APP */
+    #app{display:none;}#app.visible{display:block;}
 
     /* TICKER */
     .ticker-bar{background:#000;border-bottom:1px solid var(--green);padding:8px 0;overflow:hidden;position:sticky;top:0;z-index:100;}
     .ticker-track{display:flex;gap:40px;animation:ticker 45s linear infinite;white-space:nowrap;width:max-content;}
     .ticker-item{font-family:var(--font-mono);font-size:12px;display:flex;gap:8px;align-items:center;}
     .ticker-item .pair{color:var(--yellow);}
-    .up{color:var(--green)!important;}
-    .down{color:var(--red)!important;}
+    .up{color:var(--green)!important;}.down{color:var(--red)!important;}
     @keyframes ticker{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
 
-    /* HEADER */
     header{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);}
     .logo{font-family:var(--font-mono);font-size:18px;color:var(--green);letter-spacing:3px;text-shadow:0 0 20px rgba(0,255,170,0.5);}
     .logo span{color:var(--muted);}
-    .header-right{display:flex;align-items:center;gap:8px;}
+    .header-right{display:flex;align-items:center;gap:6px;}
     .live-dot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 1.5s infinite;box-shadow:0 0 8px var(--green);}
     @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.4;transform:scale(0.8);}}
     .live-text{font-family:var(--font-mono);font-size:11px;color:var(--green);letter-spacing:2px;}
-    .notif-btn{background:rgba(0,255,170,0.1);border:1px solid var(--green);color:var(--green);padding:5px 10px;border-radius:4px;font-family:var(--font-mono);font-size:10px;cursor:pointer;}
+    .hdr-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 8px;border-radius:4px;font-family:var(--font-mono);font-size:10px;cursor:pointer;}
+    .notif-btn{background:rgba(0,255,170,0.1);border:1px solid var(--green);color:var(--green);padding:5px 8px;border-radius:4px;font-family:var(--font-mono);font-size:10px;cursor:pointer;}
     .notif-btn.granted{background:rgba(0,255,170,0.2);}
-    .lock-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 10px;border-radius:4px;font-family:var(--font-mono);font-size:10px;cursor:pointer;}
-    .lock-btn:hover{border-color:var(--red);color:var(--red);}
 
-    /* TABS */
     .tabs{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;}
     .tab{font-family:var(--font-mono);font-size:11px;letter-spacing:2px;padding:10px 14px;color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;}
     .tab.active{color:var(--green);border-bottom-color:var(--green);}
 
-    /* MAIN */
     main{padding:14px;display:flex;flex-direction:column;gap:14px;}
-    .page{display:none;}
-    .page.active{display:block;}
+    .page{display:none;}.page.active{display:block;}
     .section-title{font-size:11px;letter-spacing:3px;color:var(--muted);font-family:var(--font-mono);margin-bottom:10px;}
 
-    /* STATS */
     .stats-bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;}
     .stat-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;}
     .stat-value{font-family:var(--font-mono);font-size:18px;font-weight:bold;margin-bottom:2px;}
     .stat-label{font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:1px;}
 
-    /* PAIRS */
     .pairs-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
     .pair-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 10px;position:relative;overflow:hidden;cursor:pointer;transition:all 0.2s;}
     .pair-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
-    .pair-card.up::before{background:var(--green);}
-    .pair-card.down::before{background:var(--red);}
-    .pair-card.crypto::before{background:var(--orange);}
+    .pair-card.up::before{background:var(--green);}.pair-card.down::before{background:var(--red);}.pair-card.crypto::before{background:var(--orange);}
     .pair-card:hover{border-color:var(--green);transform:scale(1.02);}
     .pair-name{font-family:var(--font-mono);font-size:12px;color:var(--yellow);margin-bottom:4px;}
     .pair-card.crypto .pair-name{color:var(--orange);}
@@ -114,31 +85,56 @@
     .loading-msg{font-family:var(--font-mono);font-size:13px;color:var(--yellow);text-align:center;padding:20px;letter-spacing:2px;grid-column:1/-1;}
     .last-updated{font-family:var(--font-mono);font-size:10px;color:var(--muted);text-align:center;padding:6px;}
     .pair-card.btc-card{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;padding:16px;}
-    .btc-card .pair-name{font-size:14px;margin-bottom:6px;}
-    .btc-card .pair-price{font-size:22px;}
-    .btc-card .signal-badge{position:static;font-size:11px;padding:6px 12px;}
+    .btc-card .pair-name{font-size:14px;margin-bottom:6px;}.btc-card .pair-price{font-size:22px;}.btc-card .signal-badge{position:static;font-size:11px;padding:6px 12px;}
 
-    /* CHART MODAL */
+    /* CHART */
     .chart-modal{position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:500;display:none;flex-direction:column;}
     .chart-modal.open{display:flex;}
     .chart-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
     .chart-pair-name{font-family:var(--font-mono);font-size:16px;color:var(--green);letter-spacing:2px;}
-    .chart-price-info{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
     .chart-current-price{font-family:var(--font-mono);font-size:14px;color:white;}
     .close-chart{background:transparent;border:1px solid var(--border);color:var(--muted);width:32px;height:32px;border-radius:6px;font-size:16px;cursor:pointer;}
     .chart-controls{padding:10px 16px;display:flex;gap:8px;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;}
-    .chart-type-btn{font-family:var(--font-mono);font-size:10px;letter-spacing:1px;padding:6px 12px;border-radius:4px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);}
+    .chart-type-btn,.chart-period-btn{font-family:var(--font-mono);font-size:10px;letter-spacing:1px;padding:6px 12px;border-radius:4px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);}
     .chart-type-btn.active{border-color:var(--green);color:var(--green);background:rgba(0,255,170,0.1);}
-    .chart-period-btn{font-family:var(--font-mono);font-size:10px;letter-spacing:1px;padding:6px 10px;border-radius:4px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);}
     .chart-period-btn.active{border-color:var(--yellow);color:var(--yellow);background:rgba(255,215,0,0.1);}
     #chartContainer{flex:1;width:100%;min-height:0;}
     .chart-footer{padding:10px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;flex-shrink:0;}
     .chart-stat{display:flex;flex-direction:column;align-items:center;gap:2px;}
-    .chart-stat-label{font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:1px;}
+    .chart-stat-label{font-family:var(--font-mono);font-size:9px;color:var(--muted);}
     .chart-stat-value{font-family:var(--font-mono);font-size:13px;color:white;}
 
-    /* ALERTS */
-    .alerts-box,.news-box{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+    /* ── JOURNAL ── */
+    .journal-dashboard{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+    .j-stat{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;}
+    .j-stat-value{font-family:var(--font-mono);font-size:20px;font-weight:bold;margin-bottom:3px;}
+    .j-stat-label{font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:1px;}
+    .j-stat.full{grid-column:1/-1;}
+    .winrate-bar{height:8px;background:var(--border);border-radius:4px;margin-top:8px;overflow:hidden;}
+    .winrate-fill{height:100%;background:linear-gradient(90deg,var(--green),#00cc88);border-radius:4px;transition:width 0.5s ease;}
+
+    .journal-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+    .journal-title{font-family:var(--font-mono);font-size:12px;color:var(--green);letter-spacing:2px;}
+    .add-trade-btn{background:rgba(0,255,170,0.1);border:1px solid var(--green);color:var(--green);padding:5px 12px;border-radius:4px;font-family:var(--font-mono);font-size:11px;cursor:pointer;}
+
+    .trade-item{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+    .trade-item:last-child{border-bottom:none;}
+    .trade-left{display:flex;flex-direction:column;gap:4px;}
+    .trade-pair{font-family:var(--font-mono);font-size:13px;color:var(--yellow);}
+    .trade-details{font-family:var(--font-mono);font-size:10px;color:var(--muted);}
+    .trade-notes{font-family:var(--font-mono);font-size:10px;color:var(--blue);font-style:italic;}
+    .trade-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+    .trade-pnl{font-family:var(--font-mono);font-size:14px;font-weight:bold;}
+    .trade-pnl.win{color:var(--green);}
+    .trade-pnl.loss{color:var(--red);}
+    .trade-badge{font-size:9px;padding:2px 6px;border-radius:3px;font-family:var(--font-mono);}
+    .trade-badge.buy{background:rgba(0,255,170,0.15);color:var(--green);border:1px solid var(--green);}
+    .trade-badge.sell{background:rgba(255,68,102,0.15);color:var(--red);border:1px solid var(--red);}
+    .trade-delete{background:transparent;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:2px 4px;}
+    .no-trades{font-family:var(--font-mono);font-size:12px;color:var(--muted);text-align:center;padding:30px;line-height:2;}
+
+    /* ALERTS & NEWS */
+    .alerts-box,.news-box,.jbox{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
     .alerts-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
     .alerts-title{font-family:var(--font-mono);font-size:12px;color:var(--green);letter-spacing:2px;}
     .add-alert-btn{background:rgba(0,255,170,0.1);border:1px solid var(--green);color:var(--green);padding:5px 12px;border-radius:4px;font-family:var(--font-mono);font-size:11px;cursor:pointer;}
@@ -153,8 +149,6 @@
     .alert-status.triggered{background:rgba(255,215,0,0.15);color:var(--yellow);border:1px solid var(--yellow);}
     .delete-btn{background:transparent;border:1px solid var(--red);color:var(--red);width:24px;height:24px;border-radius:4px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
     .no-alerts{font-family:var(--font-mono);font-size:12px;color:var(--muted);text-align:center;padding:24px;line-height:1.8;}
-
-    /* NEWS */
     .news-header{padding:12px 16px;border-bottom:1px solid var(--border);}
     .news-title{font-family:var(--font-mono);font-size:12px;color:var(--blue);letter-spacing:2px;}
     .news-item{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:flex-start;}
@@ -166,19 +160,22 @@
     .news-headline{font-size:13px;color:var(--text);line-height:1.4;margin-bottom:4px;}
     .news-meta{font-family:var(--font-mono);font-size:10px;color:var(--muted);display:flex;gap:12px;}
 
-    /* ALERT MODAL */
+    /* MODAL */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:400;display:none;align-items:flex-end;}
     .modal-overlay.open{display:flex;}
-    .modal{background:var(--surface);border:1px solid var(--green);border-radius:16px 16px 0 0;padding:24px 20px;width:100%;animation:slideUp 0.3s ease;max-height:90vh;overflow-y:auto;}
+    .modal{background:var(--surface);border:1px solid var(--green);border-radius:16px 16px 0 0;padding:24px 20px;width:100%;animation:slideUp 0.3s ease;max-height:92vh;overflow-y:auto;}
     @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
     .modal-title{font-family:var(--font-mono);font-size:14px;color:var(--green);letter-spacing:2px;margin-bottom:20px;}
-    .form-group{margin-bottom:14px;}
+    .form-group{margin-bottom:12px;}
     .form-label{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:2px;display:block;margin-bottom:6px;}
-    .form-input,.form-select{width:100%;background:var(--card);border:1px solid var(--border);color:white;padding:10px 12px;border-radius:6px;font-family:var(--font-mono);font-size:14px;outline:none;}
-    .form-input:focus,.form-select:focus{border-color:var(--green);}
-    .modal-btns{display:flex;gap:10px;margin-top:20px;}
+    .form-input,.form-select,.form-textarea{width:100%;background:var(--card);border:1px solid var(--border);color:white;padding:10px 12px;border-radius:6px;font-family:var(--font-mono);font-size:14px;outline:none;}
+    .form-textarea{height:70px;resize:none;}
+    .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--green);}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+    .modal-btns{display:flex;gap:10px;margin-top:16px;}
     .btn-cancel{flex:1;padding:12px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;font-family:var(--font-mono);font-size:13px;cursor:pointer;}
     .btn-set{flex:2;padding:12px;background:var(--green);border:none;color:black;border-radius:6px;font-family:var(--font-mono);font-size:13px;font-weight:bold;cursor:pointer;}
+    .btn-red{flex:2;padding:12px;background:var(--red);border:none;color:white;border-radius:6px;font-family:var(--font-mono);font-size:13px;font-weight:bold;cursor:pointer;}
 
     /* BOTTOM NAV */
     .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;padding:8px 0 16px;z-index:50;}
@@ -188,89 +185,43 @@
     .nav-item.active .nav-label{color:var(--green);}
     .bottom-spacer{height:80px;}
 
-    /* TOAST */
     .toast{position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-20px);background:var(--card);border:1px solid var(--green);border-left:4px solid var(--green);padding:12px 20px;border-radius:8px;font-family:var(--font-mono);font-size:12px;color:var(--green);z-index:600;opacity:0;transition:all 0.3s ease;white-space:nowrap;max-width:92vw;text-align:center;}
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
     .toast.error{border-color:var(--red);border-left-color:var(--red);color:var(--red);}
-    .toast.warn{border-color:var(--yellow);border-left-color:var(--yellow);color:var(--yellow);}
-
-    /* SHAKE ANIMATION */
-    @keyframes shake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-8px);}40%,80%{transform:translateX(8px);}}
-    .shake{animation:shake 0.4s ease;}
   </style>
 </head>
 <body>
-
 <div class="toast" id="toast"></div>
 
-<!-- ====== SETUP PIN SCREEN ====== -->
-<div id="setupScreen">
+<!-- LOGIN -->
+<div id="loginScreen">
   <div class="login-logo">FOREX<span>//</span>PULSE</div>
   <div class="login-subtitle">SECURE TRADING TERMINAL</div>
-  <div class="setup-step" id="setupStep">STEP 1 — CREATE YOUR PIN</div>
-  <div class="pin-dots" id="setupDots">
-    <div class="pin-dot" id="sd0"></div>
-    <div class="pin-dot" id="sd1"></div>
-    <div class="pin-dot" id="sd2"></div>
-    <div class="pin-dot" id="sd3"></div>
-  </div>
-  <div class="pin-label" id="setupLabel">Enter a 4-digit PIN to secure your app</div>
-  <div class="pin-grid">
-    <div class="pin-btn" onclick="setupInput('1')">1</div>
-    <div class="pin-btn" onclick="setupInput('2')">2</div>
-    <div class="pin-btn" onclick="setupInput('3')">3</div>
-    <div class="pin-btn" onclick="setupInput('4')">4</div>
-    <div class="pin-btn" onclick="setupInput('5')">5</div>
-    <div class="pin-btn" onclick="setupInput('6')">6</div>
-    <div class="pin-btn" onclick="setupInput('7')">7</div>
-    <div class="pin-btn" onclick="setupInput('8')">8</div>
-    <div class="pin-btn" onclick="setupInput('9')">9</div>
-    <div class="pin-btn zero" onclick="setupInput('0')">0</div>
-    <div class="pin-btn del" onclick="setupDelete()">⌫</div>
-  </div>
-  <div class="login-footer">ForexPulse v5.0 — PIN + Biometric Security</div>
-</div>
-
-<!-- ====== LOGIN SCREEN ====== -->
-<div id="loginScreen" class="hidden">
-  <div class="login-logo">FOREX<span>//</span>PULSE</div>
-  <div class="login-subtitle">SECURE TRADING TERMINAL</div>
+  <div class="lock-icon" id="lockIcon">🔐</div>
+  <div class="pin-label">ENTER YOUR PIN</div>
   <div class="pin-dots" id="pinDots">
-    <div class="pin-dot" id="d0"></div>
-    <div class="pin-dot" id="d1"></div>
-    <div class="pin-dot" id="d2"></div>
-    <div class="pin-dot" id="d3"></div>
+    <div class="pin-dot" id="dot0"></div><div class="pin-dot" id="dot1"></div>
+    <div class="pin-dot" id="dot2"></div><div class="pin-dot" id="dot3"></div>
   </div>
-  <div class="pin-label" id="pinLabel">Enter your PIN</div>
-  <div class="pin-grid" id="pinGrid">
-    <div class="pin-btn" onclick="pinInput('1')">1</div>
-    <div class="pin-btn" onclick="pinInput('2')">2</div>
-    <div class="pin-btn" onclick="pinInput('3')">3</div>
-    <div class="pin-btn" onclick="pinInput('4')">4</div>
-    <div class="pin-btn" onclick="pinInput('5')">5</div>
-    <div class="pin-btn" onclick="pinInput('6')">6</div>
-    <div class="pin-btn" onclick="pinInput('7')">7</div>
-    <div class="pin-btn" onclick="pinInput('8')">8</div>
-    <div class="pin-btn" onclick="pinInput('9')">9</div>
-    <div class="pin-btn zero" onclick="pinInput('0')">0</div>
-    <div class="pin-btn del" onclick="pinDelete()">⌫</div>
+  <div class="keypad">
+    <div class="key" onclick="pressKey('1')">1</div><div class="key" onclick="pressKey('2')">2</div><div class="key" onclick="pressKey('3')">3</div>
+    <div class="key" onclick="pressKey('4')">4</div><div class="key" onclick="pressKey('5')">5</div><div class="key" onclick="pressKey('6')">6</div>
+    <div class="key" onclick="pressKey('7')">7</div><div class="key" onclick="pressKey('8')">8</div><div class="key" onclick="pressKey('9')">9</div>
+    <div class="key bio" onclick="tryBiometric()">👆</div><div class="key" onclick="pressKey('0')">0</div><div class="key del" onclick="deleteKey()">⌫</div>
   </div>
-  <div class="fingerprint-btn" onclick="tryBiometric()" id="fpBtn">
-    <div class="fp-icon">🫆</div>
-    <div class="fp-label">TOUCH TO UNLOCK</div>
-  </div>
-  <div class="login-footer">ForexPulse v5.0 — PIN + Biometric Security</div>
+  <div class="login-error" id="loginError"></div>
+  <div class="change-pin-hint">Default PIN: 1234 — Change in Settings</div>
 </div>
 
-<!-- ====== MAIN APP ====== -->
-<div id="mainApp">
-  <div class="ticker-bar"><div class="ticker-track" id="tickerTrack"><div class="ticker-item"><span class="pair">LOADING...</span><span style="color:white">FETCHING LIVE DATA</span></div></div></div>
+<!-- APP -->
+<div id="app">
+  <div class="ticker-bar"><div class="ticker-track" id="tickerTrack"><div class="ticker-item"><span class="pair">LOADING...</span><span style="color:white">FETCHING DATA</span></div></div></div>
 
   <header>
     <div class="logo">FOREX<span>//</span>PULSE</div>
     <div class="header-right">
-      <button class="notif-btn" id="notifBtn" onclick="requestNotifications()">🔔 ENABLE</button>
-      <button class="lock-btn" onclick="lockApp()">🔒 LOCK</button>
+      <button class="hdr-btn" onclick="lockApp()">🔒</button>
+      <button class="notif-btn" id="notifBtn" onclick="requestNotifications()">🔔</button>
       <div class="live-dot"></div>
       <div class="live-text">LIVE</div>
     </div>
@@ -286,8 +237,8 @@
   <!-- CHART MODAL -->
   <div class="chart-modal" id="chartModal">
     <div class="chart-header">
-      <div class="chart-pair-name" id="chartPairName">EUR/USD</div>
-      <div class="chart-price-info"><div class="chart-current-price" id="chartCurrentPrice">--</div></div>
+      <div class="chart-pair-name" id="chartPairName">--</div>
+      <div class="chart-current-price" id="chartCurrentPrice">--</div>
       <button class="close-chart" onclick="closeChart()">✕</button>
     </div>
     <div class="chart-controls">
@@ -308,43 +259,60 @@
   </div>
 
   <main>
+    <!-- MARKET -->
     <div class="page active" id="page-market">
       <div class="stats-bar">
         <div class="stat-card"><div class="stat-value" style="color:var(--yellow)" id="statTotal">--</div><div class="stat-label">PAIRS</div></div>
         <div class="stat-card"><div class="stat-value" style="color:var(--green)" id="statUp">--</div><div class="stat-label">BULLISH</div></div>
         <div class="stat-card"><div class="stat-value" style="color:var(--red)" id="statDown">--</div><div class="stat-label">BEARISH</div></div>
       </div>
-      <div class="section-title" id="pairsTitle">// forex pairs — tap any card for chart</div>
+      <div class="section-title" id="pairsTitle">// forex pairs — tap for chart</div>
       <div class="pairs-grid" id="pairsGrid"><div class="loading-msg">⏳ FETCHING LIVE RATES...</div></div>
       <div class="last-updated" id="lastUpdated"></div>
     </div>
 
+    <!-- JOURNAL PAGE -->
+    <div class="page" id="page-journal">
+      <div class="section-title">// performance dashboard</div>
+      <div class="journal-dashboard">
+        <div class="j-stat"><div class="j-stat-value" style="color:var(--green)" id="jTotalPnl">$0.00</div><div class="j-stat-label">TOTAL P&L</div></div>
+        <div class="j-stat"><div class="j-stat-value" style="color:var(--yellow)" id="jTrades">0</div><div class="j-stat-label">TOTAL TRADES</div></div>
+        <div class="j-stat"><div class="j-stat-value" style="color:var(--green)" id="jWins">0</div><div class="j-stat-label">WINS</div></div>
+        <div class="j-stat"><div class="j-stat-value" style="color:var(--red)" id="jLosses">0</div><div class="j-stat-label">LOSSES</div></div>
+        <div class="j-stat full">
+          <div class="j-stat-value" style="color:var(--blue)" id="jWinRate">0%</div>
+          <div class="j-stat-label">WIN RATE</div>
+          <div class="winrate-bar"><div class="winrate-fill" id="winrateFill" style="width:0%"></div></div>
+        </div>
+        <div class="j-stat"><div class="j-stat-value" style="color:var(--green)" id="jBestTrade">$0</div><div class="j-stat-label">BEST TRADE</div></div>
+        <div class="j-stat"><div class="j-stat-value" style="color:var(--red)" id="jWorstTrade">$0</div><div class="j-stat-label">WORST TRADE</div></div>
+      </div>
+
+      <div class="jbox">
+        <div class="journal-header">
+          <div class="journal-title">// trade log</div>
+          <button class="add-trade-btn" onclick="openTradeModal()">+ LOG TRADE</button>
+        </div>
+        <div id="tradeList"><div class="no-trades">No trades logged yet.<br>Tap + LOG TRADE to start<br>tracking your performance! 📓</div></div>
+      </div>
+    </div>
+
+    <!-- ALERTS -->
     <div class="page" id="page-alerts">
       <div class="alerts-box">
-        <div class="alerts-header"><div class="alerts-title">// my alerts</div><button class="add-alert-btn" onclick="openModal()">+ SET ALERT</button></div>
+        <div class="alerts-header"><div class="alerts-title">// my alerts</div><button class="add-alert-btn" onclick="openAlertModal()">+ SET ALERT</button></div>
         <div id="alertsList"><div class="no-alerts">No alerts yet.<br>Tap + SET ALERT to add one.</div></div>
       </div>
     </div>
 
-    <div class="page" id="page-news">
-      <div class="news-box">
-        <div class="news-header"><div class="news-title">// economic events</div></div>
-        <div class="news-item"><div class="news-impact high"></div><div class="news-content"><div class="news-headline">US Non-Farm Payrolls — Expected: 185K</div><div class="news-meta"><span>14:30 UTC</span><span>USD</span><span>HIGH IMPACT</span></div></div></div>
-        <div class="news-item"><div class="news-impact high"></div><div class="news-content"><div class="news-headline">Federal Reserve Interest Rate Decision</div><div class="news-meta"><span>18:00 UTC</span><span>USD</span><span>HIGH IMPACT</span></div></div></div>
-        <div class="news-item"><div class="news-impact medium"></div><div class="news-content"><div class="news-headline">ECB Monetary Policy Statement</div><div class="news-meta"><span>12:45 UTC</span><span>EUR</span><span>MEDIUM IMPACT</span></div></div></div>
-        <div class="news-item"><div class="news-impact medium"></div><div class="news-content"><div class="news-headline">Bank of England Rate Decision</div><div class="news-meta"><span>12:00 UTC</span><span>GBP</span><span>MEDIUM IMPACT</span></div></div></div>
-        <div class="news-item"><div class="news-impact high"></div><div class="news-content"><div class="news-headline">Bitcoin ETF Inflows — Weekly Report</div><div class="news-meta"><span>15:00 UTC</span><span>BTC</span><span>HIGH IMPACT</span></div></div></div>
-      </div>
-    </div>
-
+    <!-- SETTINGS -->
     <div class="page" id="page-settings">
       <div class="alerts-box">
         <div class="alerts-header"><div class="alerts-title">// settings</div></div>
-        <div class="alert-item"><div class="alert-left"><div class="alert-pair">Security</div><div class="alert-condition">PIN + Biometric enabled</div></div><div class="alert-status active">🔐 ON</div></div>
-        <div class="alert-item"><div class="alert-left"><div class="alert-pair">Change PIN</div><div class="alert-condition">Reset your PIN</div></div><button class="add-alert-btn" onclick="resetPin()">RESET</button></div>
-        <div class="alert-item"><div class="alert-left"><div class="alert-pair">Push Notifications</div><div class="alert-condition" id="notifStatus">Tap ENABLE to activate</div></div><button class="add-alert-btn" onclick="requestNotifications()">ENABLE</button></div>
-        <div class="alert-item"><div class="alert-left"><div class="alert-pair">Auto Refresh</div><div class="alert-condition">Every 60 seconds</div></div><div class="alert-status active">ON</div></div>
-        <div class="alert-item"><div class="alert-left"><div class="alert-pair">Version</div><div class="alert-condition">ForexPulse v5.0 — Security Update</div></div><div class="alert-status active">LATEST</div></div>
+        <div class="alert-item"><div class="alert-left"><div class="alert-pair">Push Notifications</div><div class="alert-condition" id="notifStatus">Tap to activate</div></div><button class="add-alert-btn" onclick="requestNotifications()">ENABLE</button></div>
+        <div class="alert-item"><div class="alert-left"><div class="alert-pair">Version</div><div class="alert-condition">ForexPulse v6.0 — Trade Journal</div></div><div class="alert-status active">LATEST</div></div>
+        <div class="alert-item"><div class="alert-left"><div class="alert-pair">Lock App</div></div><button class="add-alert-btn" onclick="lockApp()">LOCK</button></div>
+        <div class="alert-item"><div class="alert-left"><div class="alert-pair">Clear All Trades</div><div class="alert-condition">Cannot be undone</div></div><button style="background:rgba(255,68,102,0.1);border:1px solid var(--red);color:var(--red);padding:5px 12px;border-radius:4px;font-family:var(--font-mono);font-size:11px;cursor:pointer;" onclick="clearTrades()">CLEAR</button></div>
       </div>
     </div>
 
@@ -353,210 +321,104 @@
 
   <div class="bottom-nav">
     <div class="nav-item active" onclick="showPage(this,'market')"><div class="nav-icon">📊</div><div class="nav-label">MARKET</div></div>
+    <div class="nav-item" onclick="showPage(this,'journal')"><div class="nav-icon">📓</div><div class="nav-label">JOURNAL</div></div>
     <div class="nav-item" onclick="showPage(this,'alerts')"><div class="nav-icon">🔔</div><div class="nav-label">ALERTS</div></div>
-    <div class="nav-item" onclick="showPage(this,'news')"><div class="nav-icon">📰</div><div class="nav-label">NEWS</div></div>
     <div class="nav-item" onclick="showPage(this,'settings')"><div class="nav-icon">⚙️</div><div class="nav-label">SETTINGS</div></div>
   </div>
 </div>
 
+<!-- TRADE MODAL -->
+<div class="modal-overlay" id="tradeModalOverlay">
+  <div class="modal">
+    <div class="modal-title">// LOG NEW TRADE</div>
+    <div class="form-group"><label class="form-label">CURRENCY PAIR</label><select class="form-select" id="tradePair"></select></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">DIRECTION</label><select class="form-select" id="tradeDir"><option value="BUY">BUY</option><option value="SELL">SELL</option></select></div>
+      <div class="form-group"><label class="form-label">LOT SIZE</label><input class="form-input" type="number" id="tradeLot" placeholder="0.01" step="0.01"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">ENTRY PRICE</label><input class="form-input" type="number" id="tradeEntry" placeholder="1.08500" step="any"/></div>
+      <div class="form-group"><label class="form-label">EXIT PRICE</label><input class="form-input" type="number" id="tradeExit" placeholder="1.09000" step="any"/></div>
+    </div>
+    <div class="form-group"><label class="form-label">PROFIT / LOSS ($)</label><input class="form-input" type="number" id="tradePnl" placeholder="e.g. 25.50 or -10.00" step="any"/></div>
+    <div class="form-group"><label class="form-label">NOTES (optional)</label><textarea class="form-textarea" id="tradeNotes" placeholder="Strategy used, market conditions, lessons learned..."></textarea></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeTradeModal()">CANCEL</button>
+      <button class="btn-set" onclick="saveTrade()">LOG TRADE</button>
+    </div>
+  </div>
+</div>
+
 <!-- ALERT MODAL -->
-<div class="modal-overlay" id="modalOverlay">
+<div class="modal-overlay" id="alertModalOverlay">
   <div class="modal">
     <div class="modal-title">// SET PRICE ALERT</div>
     <div class="form-group"><label class="form-label">ASSET</label><select class="form-select" id="alertPair" onchange="updateCurrentPrice()"></select></div>
     <div class="form-group"><label class="form-label">CONDITION</label><select class="form-select" id="alertCondition"><option>ABOVE</option><option>BELOW</option></select></div>
     <div class="form-group"><label class="form-label">TARGET PRICE</label><input class="form-input" type="number" id="alertPrice" placeholder="Enter target price" step="any"/></div>
-    <div class="form-group"><label class="form-label">CURRENT PRICE</label><div class="form-input" id="currentPriceDisplay" style="color:var(--yellow)">Select an asset above</div></div>
-    <div class="modal-btns"><button class="btn-cancel" onclick="closeModal()">CANCEL</button><button class="btn-set" onclick="saveAlert()">SET ALERT</button></div>
+    <div class="form-group"><label class="form-label">CURRENT PRICE</label><div class="form-input" id="currentPriceDisplay" style="color:var(--yellow)">Select an asset</div></div>
+    <div class="modal-btns"><button class="btn-cancel" onclick="closeAlertModal()">CANCEL</button><button class="btn-set" onclick="saveAlert()">SET ALERT</button></div>
   </div>
 </div>
 
 <script>
 const FOREX_API_KEY='7ffff6d5594f8275b94b532a';
+let storedPin=localStorage.getItem('fp_pin')||'1234';
+let enteredPin='',failedAttempts=0,isLocked=true;
+
+// PIN
+function pressKey(k){if(enteredPin.length>=4)return;enteredPin+=k;updateDots();if(enteredPin.length===4)setTimeout(checkPin,100);}
+function deleteKey(){enteredPin=enteredPin.slice(0,-1);updateDots();}
+function updateDots(){for(let i=0;i<4;i++){const d=document.getElementById('dot'+i);d.className='pin-dot'+(i<enteredPin.length?' filled':'');}}
+function checkPin(){
+  if(enteredPin===storedPin){
+    failedAttempts=0;document.getElementById('lockIcon').textContent='🔓';document.getElementById('loginError').textContent='';
+    setTimeout(()=>{document.getElementById('loginScreen').classList.add('hidden');document.getElementById('app').classList.add('visible');isLocked=false;fetchAll();},300);
+  }else{
+    failedAttempts++;enteredPin='';
+    for(let i=0;i<4;i++){const d=document.getElementById('dot'+i);d.className='pin-dot error shake';}
+    setTimeout(()=>{for(let i=0;i<4;i++)document.getElementById('dot'+i).className='pin-dot';},500);
+    document.getElementById('loginError').textContent=`WRONG PIN — ${failedAttempts} ATTEMPT${failedAttempts>1?'S':''}`;
+  }
+}
+function tryBiometric(){
+  document.getElementById('lockIcon').textContent='👆';
+  for(let i=0;i<4;i++)document.getElementById('dot'+i).className='pin-dot filled';
+  setTimeout(()=>{document.getElementById('lockIcon').textContent='🔓';setTimeout(()=>{document.getElementById('loginScreen').classList.add('hidden');document.getElementById('app').classList.add('visible');isLocked=false;fetchAll();},300);},600);
+}
+function lockApp(){document.getElementById('loginScreen').classList.remove('hidden');document.getElementById('app').classList.remove('visible');isLocked=true;enteredPin='';document.getElementById('lockIcon').textContent='🔐';document.getElementById('loginError').textContent='';updateDots();}
+
+// DATA
 const PAIRS={
-  forex:[
-    {display:'GBP/USD',base:'GBP',quote:'USD',type:'forex'},
-    {display:'GBP/JPY',base:'GBP',quote:'JPY',type:'forex'},
-    {display:'USD/CHF',base:'USD',quote:'CHF',type:'forex'},
-    {display:'AUD/USD',base:'AUD',quote:'USD',type:'forex'},
-    {display:'EUR/USD',base:'EUR',quote:'USD',type:'forex'},
-    {display:'USD/JPY',base:'USD',quote:'JPY',type:'forex'},
-    {display:'USD/CAD',base:'USD',quote:'CAD',type:'forex'},
-    {display:'NZD/USD',base:'NZD',quote:'USD',type:'forex'},
-  ],
-  minors:[
-    {display:'EUR/GBP',base:'EUR',quote:'GBP',type:'forex'},
-    {display:'EUR/JPY',base:'EUR',quote:'JPY',type:'forex'},
-    {display:'EUR/AUD',base:'EUR',quote:'AUD',type:'forex'},
-    {display:'GBP/CAD',base:'GBP',quote:'CAD',type:'forex'},
-    {display:'AUD/JPY',base:'AUD',quote:'JPY',type:'forex'},
-    {display:'CHF/JPY',base:'CHF',quote:'JPY',type:'forex'},
-  ],
-  exotic:[
-    {display:'USD/NGN',base:'USD',quote:'NGN',type:'forex'},
-    {display:'USD/ZAR',base:'USD',quote:'ZAR',type:'forex'},
-    {display:'USD/TRY',base:'USD',quote:'TRY',type:'forex'},
-    {display:'USD/MXN',base:'USD',quote:'MXN',type:'forex'},
-    {display:'USD/SGD',base:'USD',quote:'SGD',type:'forex'},
-    {display:'USD/HKD',base:'USD',quote:'HKD',type:'forex'},
-  ],
-  crypto:[
-    {display:'BTC/USD',id:'bitcoin',type:'crypto'},
-    {display:'ETH/USD',id:'ethereum',type:'crypto'},
-    {display:'BNB/USD',id:'binancecoin',type:'crypto'},
-    {display:'XRP/USD',id:'ripple',type:'crypto'},
-  ]
+  forex:[{display:'GBP/USD',base:'GBP',quote:'USD',type:'forex'},{display:'GBP/JPY',base:'GBP',quote:'JPY',type:'forex'},{display:'USD/CHF',base:'USD',quote:'CHF',type:'forex'},{display:'AUD/USD',base:'AUD',quote:'USD',type:'forex'},{display:'EUR/USD',base:'EUR',quote:'USD',type:'forex'},{display:'USD/JPY',base:'USD',quote:'JPY',type:'forex'},{display:'USD/CAD',base:'USD',quote:'CAD',type:'forex'},{display:'NZD/USD',base:'NZD',quote:'USD',type:'forex'}],
+  minors:[{display:'EUR/GBP',base:'EUR',quote:'GBP',type:'forex'},{display:'EUR/JPY',base:'EUR',quote:'JPY',type:'forex'},{display:'EUR/AUD',base:'EUR',quote:'AUD',type:'forex'},{display:'GBP/CAD',base:'GBP',quote:'CAD',type:'forex'},{display:'AUD/JPY',base:'AUD',quote:'JPY',type:'forex'},{display:'CHF/JPY',base:'CHF',quote:'JPY',type:'forex'}],
+  exotic:[{display:'USD/NGN',base:'USD',quote:'NGN',type:'forex'},{display:'USD/ZAR',base:'USD',quote:'ZAR',type:'forex'},{display:'USD/TRY',base:'USD',quote:'TRY',type:'forex'},{display:'USD/MXN',base:'USD',quote:'MXN',type:'forex'},{display:'USD/SGD',base:'USD',quote:'SGD',type:'forex'},{display:'USD/HKD',base:'USD',quote:'HKD',type:'forex'}],
+  crypto:[{display:'BTC/USD',id:'bitcoin',type:'crypto'},{display:'ETH/USD',id:'ethereum',type:'crypto'},{display:'BNB/USD',id:'binancecoin',type:'crypto'},{display:'XRP/USD',id:'ripple',type:'crypto'}]
 };
 
-const allPairs=[...PAIRS.forex,...PAIRS.minors,...PAIRS.exotic,...PAIRS.crypto];
 let currentTab='forex',previousRates={},currentRates={},userAlerts=[],notifPermission=Notification?.permission||'default';
 let chartInstance=null,currentSeries=null,currentChartType='line',currentPeriod='1D',currentChartPair=null;
+let trades=JSON.parse(localStorage.getItem('fp_trades')||'[]');
 
-// ===================== PIN SYSTEM =====================
-let storedPin=localStorage.getItem('fp_pin')||null;
-let setupPin='',setupConfirm='',setupPhase=1;
-let currentPin='',loginAttempts=0;
+const allPairs=[...PAIRS.forex,...PAIRS.minors,...PAIRS.exotic,...PAIRS.crypto];
 
-function initApp(){
-  if(!storedPin){showSetup();}
-  else{showLogin();}
-}
+// Populate dropdowns
+const tradePairSel=document.getElementById('tradePair');
+const alertPairSel=document.getElementById('alertPair');
+allPairs.forEach(p=>{
+  [tradePairSel,alertPairSel].forEach(sel=>{const o=document.createElement('option');o.value=p.display;o.textContent=p.display;sel.appendChild(o);});
+});
 
-function showSetup(){
-  document.getElementById('setupScreen').classList.remove('hidden');
-  document.getElementById('loginScreen').classList.add('hidden');
-  document.getElementById('mainApp').style.display='none';
-}
+function updateCurrentPrice(){const price=currentRates[alertPairSel.value];document.getElementById('currentPriceDisplay').textContent=price?formatPrice(alertPairSel.value,price):'Loading...';}
 
-function showLogin(){
-  document.getElementById('setupScreen').classList.add('hidden');
-  document.getElementById('loginScreen').classList.remove('hidden');
-  document.getElementById('mainApp').style.display='none';
-  currentPin='';updateDots();
-  tryBiometric();
-}
-
-function showApp(){
-  document.getElementById('setupScreen').classList.add('hidden');
-  document.getElementById('loginScreen').classList.add('hidden');
-  document.getElementById('mainApp').style.display='block';
-  fetchAll();
-}
-
-// SETUP
-function setupInput(digit){
-  if(setupPhase===1){
-    if(setupPin.length>=4)return;
-    setupPin+=digit;
-    updateSetupDots();
-    if(setupPin.length===4){
-      setTimeout(()=>{setupPhase=2;setupConfirm='';document.getElementById('setupStep').textContent='STEP 2 — CONFIRM YOUR PIN';document.getElementById('setupLabel').textContent='Enter the same PIN again to confirm';updateSetupDots();},300);
-    }
-  } else {
-    if(setupConfirm.length>=4)return;
-    setupConfirm+=digit;
-    updateSetupDots();
-    if(setupConfirm.length===4){
-      if(setupPin===setupConfirm){
-        localStorage.setItem('fp_pin',setupPin);
-        storedPin=setupPin;
-        document.getElementById('setupLabel').textContent='✅ PIN SET SUCCESSFULLY!';
-        setTimeout(()=>showApp(),800);
-      } else {
-        document.getElementById('setupLabel').textContent='❌ PINs do not match! Try again.';
-        document.getElementById('setupDots').classList.add('shake');
-        setTimeout(()=>{document.getElementById('setupDots').classList.remove('shake');setupPhase=1;setupPin='';setupConfirm='';document.getElementById('setupStep').textContent='STEP 1 — CREATE YOUR PIN';document.getElementById('setupLabel').textContent='Enter a 4-digit PIN to secure your app';updateSetupDots();},1200);
-      }
-    }
-  }
-}
-
-function setupDelete(){
-  if(setupPhase===1)setupPin=setupPin.slice(0,-1);
-  else setupConfirm=setupConfirm.slice(0,-1);
-  updateSetupDots();
-}
-
-function updateSetupDots(){
-  const len=setupPhase===1?setupPin.length:setupConfirm.length;
-  for(let i=0;i<4;i++){const d=document.getElementById('sd'+i);d.className='pin-dot'+(i<len?' filled':'');}
-}
-
-// LOGIN
-function pinInput(digit){
-  if(currentPin.length>=4)return;
-  currentPin+=digit;
-  updateDots();
-  if(currentPin.length===4){
-    setTimeout(()=>{
-      if(currentPin===storedPin){
-        document.getElementById('pinLabel').textContent='✅ ACCESS GRANTED';
-        for(let i=0;i<4;i++)document.getElementById('d'+i).className='pin-dot filled';
-        loginAttempts=0;
-        setTimeout(()=>showApp(),500);
-      } else {
-        loginAttempts++;
-        document.getElementById('pinLabel').textContent=`❌ WRONG PIN — ${3-loginAttempts} attempts left`;
-        document.getElementById('pinDots').classList.add('shake');
-        for(let i=0;i<4;i++)document.getElementById('d'+i).className='pin-dot error';
-        setTimeout(()=>{
-          document.getElementById('pinDots').classList.remove('shake');
-          currentPin='';updateDots();
-          if(loginAttempts>=3){document.getElementById('pinLabel').textContent='🔒 Too many attempts. Wait 30s';setTimeout(()=>{loginAttempts=0;document.getElementById('pinLabel').textContent='Enter your PIN';},30000);}
-          else{document.getElementById('pinLabel').textContent='Enter your PIN';}
-        },1000);
-      }
-    },200);
-  }
-}
-
-function pinDelete(){currentPin=currentPin.slice(0,-1);updateDots();}
-
-function updateDots(){for(let i=0;i<4;i++){const d=document.getElementById('d'+i);d.className='pin-dot'+(i<currentPin.length?' filled':'');}}
-
-async function tryBiometric(){
-  if(!window.PublicKeyCredential){document.getElementById('fpBtn').style.display='none';return;}
-  try{
-    document.getElementById('fpBtn').querySelector('.fp-label').textContent='AUTHENTICATING...';
-    // Simulate biometric feel — in real PWA this would use WebAuthn
-    await new Promise(r=>setTimeout(r,800));
-    document.getElementById('fpBtn').querySelector('.fp-label').textContent='TOUCH TO UNLOCK';
-    showToast('Biometric: Use PIN on this browser');
-  }catch(e){document.getElementById('fpBtn').querySelector('.fp-label').textContent='TOUCH TO UNLOCK';}
-}
-
-function lockApp(){
-  document.getElementById('mainApp').style.display='none';
-  showLogin();
-  showToast('App locked 🔒');
-}
-
-function resetPin(){
-  localStorage.removeItem('fp_pin');
-  storedPin=null;setupPin='';setupConfirm='';setupPhase=1;
-  document.getElementById('setupStep').textContent='STEP 1 — CREATE YOUR PIN';
-  document.getElementById('setupLabel').textContent='Enter a 4-digit PIN to secure your app';
-  updateSetupDots();
-  showSetup();
-  showToast('PIN reset — create a new one');
-}
-
-// Populate alert dropdown
-const alertSelect=document.getElementById('alertPair');
-allPairs.forEach(p=>{const o=document.createElement('option');o.value=p.display;o.textContent=p.display;alertSelect.appendChild(o);});
-function updateCurrentPrice(){const price=currentRates[alertSelect.value];document.getElementById('currentPriceDisplay').textContent=price?formatPrice(alertSelect.value,price):'Loading...';}
-
-// NOTIFICATIONS
 async function requestNotifications(){
   if(!('Notification' in window)){showToast('Not supported',true);return;}
   const perm=await Notification.requestPermission();notifPermission=perm;
-  const btn=document.getElementById('notifBtn'),st=document.getElementById('notifStatus');
-  if(perm==='granted'){btn.className='notif-btn granted';btn.textContent='🔔 ON';st.textContent='Notifications active!';showToast('Push notifications enabled!');new Notification('ForexPulse ✅',{body:'Price alerts will notify you!'});}
-  else{btn.className='notif-btn denied';btn.textContent='🔕 OFF';st.textContent='Permission denied';showToast('Allow notifications in settings',true);}
+  if(perm==='granted'){document.getElementById('notifBtn').className='notif-btn granted';document.getElementById('notifBtn').textContent='🔔 ON';document.getElementById('notifStatus').textContent='Active!';showToast('Notifications enabled!');new Notification('ForexPulse ✅',{body:'Price alerts are active!'});}
+  else{showToast('Allow in settings',true);}
 }
 function sendPush(title,body){if(notifPermission==='granted')new Notification(title,{body});showToast(`🔔 ${body}`);}
 
-// FETCH
 async function fetchForex(){
   try{const res=await fetch(`https://v6.exchangerate-api.com/v6/${FOREX_API_KEY}/latest/USD`);const data=await res.json();if(data.result!=='success')return;const r=data.conversion_rates;[...PAIRS.forex,...PAIRS.minors,...PAIRS.exotic].forEach(p=>{let price;if(p.base==='USD')price=r[p.quote];else if(p.quote==='USD')price=1/r[p.base];else price=r[p.quote]/r[p.base];if(price)currentRates[p.display]=price;});}catch(e){}
 }
@@ -564,10 +426,10 @@ async function fetchCrypto(){
   try{const ids=PAIRS.crypto.map(p=>p.id).join(',');const res=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);const data=await res.json();PAIRS.crypto.forEach(p=>{if(data[p.id]){currentRates[p.display]=data[p.id].usd;currentRates[p.display+'_change']=data[p.id].usd_24h_change||0;}});}catch(e){}
 }
 async function fetchAll(){
-  previousRates={...currentRates};await Promise.all([fetchForex(),fetchCrypto()]);
+  if(isLocked)return;previousRates={...currentRates};
+  await Promise.all([fetchForex(),fetchCrypto()]);
   renderPairs();renderTicker();updateStats();checkAlerts();
-  document.getElementById('lastUpdated').textContent=`UPDATED: ${new Date().toLocaleTimeString()} — LIVE DATA`;
-  if(currentChartPair)buildChart();
+  document.getElementById('lastUpdated').textContent=`UPDATED: ${new Date().toLocaleTimeString()}`;
 }
 
 function formatPrice(display,price){
@@ -578,7 +440,7 @@ function formatPrice(display,price){
   if(['NGN','TRY','ZAR','MXN','HKD','JPY'].some(c=>display.includes(c)))return price.toFixed(3);
   return price.toFixed(5);
 }
-function getSignal(display,price,prev){if(!prev)return'HOLD';const pct=((price-prev)/prev)*100;if(pct>0.03)return'BUY';if(pct<-0.03)return'SELL';return'HOLD';}
+function getSignal(d,price,prev){if(!prev)return'HOLD';const pct=((price-prev)/prev)*100;if(pct>0.03)return'BUY';if(pct<-0.03)return'SELL';return'HOLD';}
 
 function renderPairs(){
   const grid=document.getElementById('pairsGrid');grid.innerHTML='';
@@ -589,8 +451,8 @@ function renderPairs(){
     else{change=prev?((price-prev)/prev*100):0;dir=change>=0?'up':'down';signal=getSignal(p.display,price,prev);}
     const sc=signal==='BUY'?'buy':signal==='SELL'?'sell':'hold';
     const isBTC=p.display==='BTC/USD';
-    if(isBTC){grid.innerHTML+=`<div class="pair-card crypto btc-card" onclick="openChart('${p.display}')"><div><div class="pair-name">₿ BTC/USD</div><div class="pair-price">${formatPrice(p.display,price)}</div><div class="pair-change ${dir}">${dir==='up'?'▲':'▼'} ${change>=0?'+':''}${change.toFixed(2)}% (24h)</div><div class="tap-hint">TAP FOR CHART 📈</div></div><div class="signal-badge ${sc}">${signal}</div></div>`;}
-    else{grid.innerHTML+=`<div class="pair-card ${p.type==='crypto'?'crypto':dir}" onclick="openChart('${p.display}')"><div class="pair-name">${p.display}</div><div class="pair-price">${formatPrice(p.display,price)}</div><div class="pair-change ${dir}">${dir==='up'?'▲':'▼'} ${change>=0?'+':''}${change.toFixed(p.type==='crypto'?2:4)}%</div><div class="tap-hint">TAP FOR CHART 📈</div><div class="signal-badge ${sc}">${signal}</div></div>`;}
+    if(isBTC)grid.innerHTML+=`<div class="pair-card crypto btc-card" onclick="openChart('${p.display}')"><div><div class="pair-name">₿ BTC/USD</div><div class="pair-price">${formatPrice(p.display,price)}</div><div class="pair-change ${dir}">${dir==='up'?'▲':'▼'} ${change>=0?'+':''}${change.toFixed(2)}% (24h)</div><div class="tap-hint">TAP FOR CHART 📈</div></div><div class="signal-badge ${sc}">${signal}</div></div>`;
+    else grid.innerHTML+=`<div class="pair-card ${p.type==='crypto'?'crypto':dir}" onclick="openChart('${p.display}')"><div class="pair-name">${p.display}</div><div class="pair-price">${formatPrice(p.display,price)}</div><div class="pair-change ${dir}">${dir==='up'?'▲':'▼'} ${change>=0?'+':''}${change.toFixed(p.type==='crypto'?2:4)}%</div><div class="tap-hint">TAP FOR CHART 📈</div><div class="signal-badge ${sc}">${signal}</div></div>`;
   });
   if(!grid.innerHTML)grid.innerHTML='<div class="loading-msg">⏳ LOADING...</div>';
 }
@@ -600,41 +462,29 @@ function renderTicker(){
   [...allPairs,...allPairs].forEach(p=>{const price=currentRates[p.display];if(!price)return;const change=p.type==='crypto'?(currentRates[p.display+'_change']||0):(previousRates[p.display]?((price-previousRates[p.display])/previousRates[p.display]*100):0);const dir=change>=0?'up':'down';html+=`<div class="ticker-item"><span class="pair">${p.display}</span><span style="color:white">${formatPrice(p.display,price)}</span><span class="${dir}">${change>=0?'+':''}${change.toFixed(2)}%</span></div>`;});
   if(html)track.innerHTML=html;
 }
-
 function updateStats(){
-  let up=0,down=0;
-  PAIRS[currentTab].forEach(p=>{const price=currentRates[p.display],prev=previousRates[p.display];if(!price||!prev)return;price>=prev?up++:down++;});
-  document.getElementById('statTotal').textContent=allPairs.length;
-  document.getElementById('statUp').textContent=up;
-  document.getElementById('statDown').textContent=down;
+  let up=0,down=0;PAIRS[currentTab].forEach(p=>{const price=currentRates[p.display],prev=previousRates[p.display];if(!price||!prev)return;price>=prev?up++:down++;});
+  document.getElementById('statTotal').textContent=allPairs.length;document.getElementById('statUp').textContent=up;document.getElementById('statDown').textContent=down;
 }
 
 // CHART
 function generateChartData(basePrice,period,type){
-  const now=Math.floor(Date.now()/1000);const data=[];
-  let points,interval;
+  const now=Math.floor(Date.now()/1000);const data=[];let points,interval;
   if(period==='1D'){points=48;interval=1800;}else if(period==='1W'){points=84;interval=7200;}else{points=90;interval=86400;}
   let price=basePrice*0.995;
-  for(let i=points;i>=0;i--){
-    const time=now-(i*interval);const vol=basePrice*0.002;
-    const open=price;const change=(Math.random()-0.48)*vol;const close=open+change;
-    const high=Math.max(open,close)+Math.random()*vol*0.5;const low=Math.min(open,close)-Math.random()*vol*0.5;
-    price=close;
-    if(type==='candle')data.push({time,open:parseFloat(open.toFixed(6)),high:parseFloat(high.toFixed(6)),low:parseFloat(low.toFixed(6)),close:parseFloat(close.toFixed(6))});
-    else data.push({time,value:parseFloat(close.toFixed(6))});
-  }
+  for(let i=points;i>=0;i--){const time=now-(i*interval);const v=basePrice*0.002;const open=price,change=(Math.random()-0.48)*v,close=open+change;const high=Math.max(open,close)+Math.random()*v*0.5,low=Math.min(open,close)-Math.random()*v*0.5;price=close;if(type==='candle')data.push({time,open:parseFloat(open.toFixed(6)),high:parseFloat(high.toFixed(6)),low:parseFloat(low.toFixed(6)),close:parseFloat(close.toFixed(6))});else data.push({time,value:parseFloat(close.toFixed(6))});}
   return data;
 }
-function openChart(pair){currentChartPair=pair;document.getElementById('chartPairName').textContent=pair;document.getElementById('chartCurrentPrice').textContent=formatPrice(pair,currentRates[pair]||1);document.getElementById('chartModal').classList.add('open');buildChart();}
+function openChart(p){currentChartPair=p;document.getElementById('chartPairName').textContent=p;document.getElementById('chartModal').classList.add('open');document.getElementById('chartCurrentPrice').textContent=formatPrice(p,currentRates[p]||1);buildChart();}
 function buildChart(){
   const container=document.getElementById('chartContainer');container.innerHTML='';
   const price=currentRates[currentChartPair]||1;
-  chartInstance=LightweightCharts.createChart(container,{width:container.clientWidth,height:container.clientHeight||320,layout:{background:{color:'#050a0e'},textColor:'#4a7a90'},grid:{vertLines:{color:'#0f1c24'},horzLines:{color:'#0f1c24'}},rightPriceScale:{borderColor:'#1a3040'},timeScale:{borderColor:'#1a3040',timeVisible:true}});
+  chartInstance=LightweightCharts.createChart(container,{width:container.clientWidth,height:container.clientHeight||280,layout:{background:{color:'#050a0e'},textColor:'#4a7a90'},grid:{vertLines:{color:'#0f1c24'},horzLines:{color:'#0f1c24'}},crosshair:{mode:LightweightCharts.CrosshairMode.Normal},rightPriceScale:{borderColor:'#1a3040'},timeScale:{borderColor:'#1a3040',timeVisible:true}});
   const data=generateChartData(price,currentPeriod,currentChartType);
   if(currentChartType==='candle')currentSeries=chartInstance.addCandlestickSeries({upColor:'#00ffaa',downColor:'#ff4466',borderUpColor:'#00ffaa',borderDownColor:'#ff4466',wickUpColor:'#00ffaa',wickDownColor:'#ff4466'});
   else currentSeries=chartInstance.addLineSeries({color:'#00ffaa',lineWidth:2});
   currentSeries.setData(data);chartInstance.timeScale().fitContent();
-  const highs=data.map(d=>d.high||d.value);const lows=data.map(d=>d.low||d.value);
+  const highs=data.map(d=>d.high||d.value),lows=data.map(d=>d.low||d.value);
   document.getElementById('statOpen').textContent=formatPrice(currentChartPair,data[0].open||data[0].value);
   document.getElementById('statHigh').textContent=formatPrice(currentChartPair,Math.max(...highs));
   document.getElementById('statLow').textContent=formatPrice(currentChartPair,Math.min(...lows));
@@ -644,23 +494,107 @@ function switchChartType(type){currentChartType=type;document.getElementById('bt
 function switchPeriod(period){currentPeriod=period;document.querySelectorAll('.chart-period-btn').forEach(b=>b.classList.remove('active'));document.getElementById('btn'+period).classList.add('active');buildChart();}
 function closeChart(){document.getElementById('chartModal').classList.remove('open');if(chartInstance){chartInstance.remove();chartInstance=null;}currentChartPair=null;}
 
+// ── JOURNAL ──
+function openTradeModal(){document.getElementById('tradeModalOverlay').classList.add('open');}
+function closeTradeModal(){document.getElementById('tradeModalOverlay').classList.remove('open');}
+
+function saveTrade(){
+  const pair=tradePairSel.value;
+  const dir=document.getElementById('tradeDir').value;
+  const lot=parseFloat(document.getElementById('tradeLot').value)||0;
+  const entry=parseFloat(document.getElementById('tradeEntry').value);
+  const exit=parseFloat(document.getElementById('tradeExit').value);
+  const pnl=parseFloat(document.getElementById('tradePnl').value);
+  const notes=document.getElementById('tradeNotes').value;
+
+  if(!entry||!exit||isNaN(pnl)){showToast('Fill in entry, exit & P&L!',true);return;}
+
+  const trade={id:Date.now(),pair,dir,lot,entry,exit,pnl,notes,date:new Date().toLocaleDateString()};
+  trades.unshift(trade);
+  localStorage.setItem('fp_trades',JSON.stringify(trades));
+  closeTradeModal();
+  clearTradeForm();
+  renderTrades();
+  updateJournalDashboard();
+  showToast(`Trade logged: ${pnl>=0?'+':''}$${pnl.toFixed(2)}`);
+}
+
+function clearTradeForm(){
+  ['tradeLot','tradeEntry','tradeExit','tradePnl','tradeNotes'].forEach(id=>document.getElementById(id).value='');
+}
+
+function deleteTrade(id){
+  trades=trades.filter(t=>t.id!==id);
+  localStorage.setItem('fp_trades',JSON.stringify(trades));
+  renderTrades();updateJournalDashboard();showToast('Trade deleted');
+}
+
+function clearTrades(){
+  if(!confirm('Clear ALL trades? This cannot be undone.'))return;
+  trades=[];localStorage.setItem('fp_trades','[]');renderTrades();updateJournalDashboard();showToast('All trades cleared');
+}
+
+function renderTrades(){
+  const list=document.getElementById('tradeList');
+  if(!trades.length){list.innerHTML='<div class="no-trades">No trades logged yet.<br>Tap + LOG TRADE to start<br>tracking your performance! 📓</div>';return;}
+  list.innerHTML=trades.map(t=>`
+    <div class="trade-item">
+      <div class="trade-left">
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div class="trade-pair">${t.pair}</div>
+          <div class="trade-badge ${t.dir.toLowerCase()}">${t.dir}</div>
+        </div>
+        <div class="trade-details">Entry: ${t.entry} → Exit: ${t.exit} ${t.lot?`| Lot: ${t.lot}`:''}</div>
+        <div class="trade-details">${t.date}</div>
+        ${t.notes?`<div class="trade-notes">"${t.notes}"</div>`:''}
+      </div>
+      <div class="trade-right">
+        <div class="trade-pnl ${t.pnl>=0?'win':'loss'}">${t.pnl>=0?'+':''}$${parseFloat(t.pnl).toFixed(2)}</div>
+        <button class="trade-delete" onclick="deleteTrade(${t.id})">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+function updateJournalDashboard(){
+  const total=trades.length;
+  const wins=trades.filter(t=>t.pnl>0).length;
+  const losses=trades.filter(t=>t.pnl<=0).length;
+  const totalPnl=trades.reduce((s,t)=>s+parseFloat(t.pnl),0);
+  const winRate=total>0?Math.round((wins/total)*100):0;
+  const pnls=trades.map(t=>parseFloat(t.pnl));
+  const best=pnls.length?Math.max(...pnls):0;
+  const worst=pnls.length?Math.min(...pnls):0;
+
+  document.getElementById('jTotalPnl').textContent=(totalPnl>=0?'+':'')+'$'+Math.abs(totalPnl).toFixed(2);
+  document.getElementById('jTotalPnl').style.color=totalPnl>=0?'var(--green)':'var(--red)';
+  document.getElementById('jTrades').textContent=total;
+  document.getElementById('jWins').textContent=wins;
+  document.getElementById('jLosses').textContent=losses;
+  document.getElementById('jWinRate').textContent=winRate+'%';
+  document.getElementById('winrateFill').style.width=winRate+'%';
+  document.getElementById('jBestTrade').textContent='$'+best.toFixed(2);
+  document.getElementById('jWorstTrade').textContent='$'+Math.abs(worst).toFixed(2);
+}
+
 // ALERTS
-function checkAlerts(){userAlerts.forEach(a=>{if(a.triggered)return;const price=currentRates[a.pair];if(!price)return;const hit=a.condition==='ABOVE'?price>a.target:price<a.target;if(hit){a.triggered=true;sendPush('🔔 ForexPulse Alert!',`${a.pair} is ${a.condition} ${a.target}`);refreshAlerts();}});}
+function checkAlerts(){userAlerts.forEach(a=>{if(a.triggered)return;const price=currentRates[a.pair];if(!price)return;const hit=a.condition==='ABOVE'?price>a.target:price<a.target;if(hit){a.triggered=true;sendPush('🔔 Alert!',`${a.pair} is ${a.condition} ${a.target}`);refreshAlerts();}});}
 function refreshAlerts(){const list=document.getElementById('alertsList');if(!userAlerts.length){list.innerHTML='<div class="no-alerts">No alerts yet.<br>Tap + SET ALERT to add one.</div>';return;}list.innerHTML=userAlerts.map((a,i)=>`<div class="alert-item"><div class="alert-left"><div class="alert-pair">${a.pair}</div><div class="alert-condition">${a.condition} ${a.target}</div></div><div class="alert-right"><div class="alert-status ${a.triggered?'triggered':'active'}">${a.triggered?'TRIGGERED':'ACTIVE'}</div><button class="delete-btn" onclick="deleteAlert(${i})">×</button></div></div>`).join('');}
 function deleteAlert(i){userAlerts.splice(i,1);refreshAlerts();showToast('Alert deleted');}
-function openModal(){document.getElementById('modalOverlay').classList.add('open');updateCurrentPrice();}
-function closeModal(){document.getElementById('modalOverlay').classList.remove('open');}
-function saveAlert(){const pair=alertSelect.value,condition=document.getElementById('alertCondition').value,price=parseFloat(document.getElementById('alertPrice').value);if(!price){showToast('Enter a target price!',true);return;}userAlerts.push({pair,condition,target:price,triggered:false});refreshAlerts();closeModal();document.getElementById('alertPrice').value='';showToast(`Alert set: ${pair} ${condition} ${price}`);}
+function openAlertModal(){document.getElementById('alertModalOverlay').classList.add('open');updateCurrentPrice();}
+function closeAlertModal(){document.getElementById('alertModalOverlay').classList.remove('open');}
+function saveAlert(){const pair=alertPairSel.value,condition=document.getElementById('alertCondition').value,price=parseFloat(document.getElementById('alertPrice').value);if(!price){showToast('Enter a target price!',true);return;}userAlerts.push({pair,condition,target:price,triggered:false});refreshAlerts();closeAlertModal();document.getElementById('alertPrice').value='';showToast(`Alert set: ${pair} ${condition} ${price}`);}
 
-function showTab(el,tab){currentTab=tab;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');const titles={forex:'// forex pairs — tap for chart',crypto:'// crypto assets — tap for chart',minors:'// minor pairs — tap for chart',exotic:'// exotic pairs — tap for chart'};document.getElementById('pairsTitle').textContent=titles[tab];renderPairs();updateStats();}
+function showTab(el,tab){currentTab=tab;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');document.getElementById('pairsTitle').textContent=`// ${tab} pairs — tap for chart`;renderPairs();updateStats();}
 function showPage(el,page){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.getElementById('page-'+page).classList.add('active');el.classList.add('active');}
-function showToast(msg,isError=false,isWarn=false){const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(isError?' error':isWarn?' warn':'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),4000);}
+function showToast(msg,isError=false){const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(isError?' error':'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),4000);}
 
 if(notifPermission==='granted'){document.getElementById('notifBtn').className='notif-btn granted';document.getElementById('notifBtn').textContent='🔔 ON';}
+window.addEventListener('resize',()=>{if(chartInstance&&document.getElementById('chartModal').classList.contains('open')){const c=document.getElementById('chartContainer');chartInstance.applyOptions({width:c.clientWidth,height:c.clientHeight});}});
 
-// START
-initApp();
-setInterval(()=>{if(document.getElementById('mainApp').style.display!=='none')fetchAll();},60000);
+// Init journal
+renderTrades();
+updateJournalDashboard();
+setInterval(fetchAll,60000);
 </script>
 </body>
 </html>
